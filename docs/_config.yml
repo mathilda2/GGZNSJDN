@@ -1,0 +1,16 @@
+highlighter: pygments
+markdown: kramdown
+google_analytics:
+show_downloads: true
+plugins:
+  - jekyll-redirect-from
+
+kramdown:
+  entity_output: numeric
+
+include:
+  - _static
+  - _modules
+
+DAVINCI_VERSION: 0.3
+DAVINCI_VERSION_SHORT: 0.3

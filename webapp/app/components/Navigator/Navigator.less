@@ -1,0 +1,80 @@
+@import "../../assets/less/variable";
+
+.header {
+  height: 64px;
+  background-color: @body-background;
+  box-shadow: @header-box-shadow;
+  flex-shrink: 0;
+  z-index: @header-index;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+
+  &.hide {
+    display: none;
+  }
+}
+
+.logo {
+  width: 200px;
+  height: 64px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+
+  a {
+    line-height: 0;
+  }
+
+  img {
+    width: 160px;
+    height: 63px;
+  }
+}
+
+@media (min-width: 768px) {
+  .logoPc {
+    display: block;
+  }
+
+  .logoMobile {
+    display: none;
+  }
+}
+
+@media (max-width: 768px) {
+  .logoPc {
+    display: none;
+  }
+
+  .logoMobile {
+    display: block;
+    img {
+      margin-left: -142px;
+    }
+  }
+}
+
+.tools {
+  margin-right: 10px;
+  display: flex;
+  flex-direction: row;
+
+  li {
+    padding: 0 10px;
+
+    i {
+      font-size: 20px;
+      cursor: pointer;
+    }
+  }
+
+  @media (max-width: 768px) {
+    .emailHide {
+      display: none;
+    }
+  }
+
+}
