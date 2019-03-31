@@ -19,6 +19,7 @@
 package edp.davinci;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -104,6 +105,20 @@ public class DavinciServerApplicationTests {
     		linksOptionlist.add(linksOption);
     	}
     	link.put("link", linksOptionlist);
+    	//拼接x轴了么
+    	int level = 3;
+    	int xWidth = 100;
+    	int yHeight = 100;
+    	/*Map crr[][] = new HashMap[][]{
+    		new HashMap[]{new HashMap(300,0)},
+    		new HashMap[]{new HashMap(100,100),new HashMap(500,100)},
+    		new HashMap[]{new HashMap(0,200),new HashMap(200,200),new HashMap(400,200),new HashMap(600,200)}
+    	};
+    	for(int i = 0 ; i < level ; i++){
+    		System.out.println(crr);
+    	}*/
+    	int[] a = new int[]{1,2,3,'#','#','#','#','#' };
+    	System.out.println(Arrays.toString(a));
     }
     
     public static Map<String, Object> getMapOption(List<String> namelist){

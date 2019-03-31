@@ -18,11 +18,21 @@ const makeClassifierBasicLearningValue= () => createSelector(
   selectClassifier,
   ({ present }) => present.get('basicLearningInputValue') 
 )
+const makeClassifierInputNumberVal= () => createSelector(
+  selectClassifier,
+  ({ present }) => present.get('inputNumberVal') 
+)
+const makePeriodicityVal= () => createSelector(
+  selectClassifier,
+  ({ present }) => present.get('periodicityVal') 
+)
 
 export {
   selectClassifier,
   makeNewClassifier,
   makeClassifierTabsActiveKey,
   makeClassifierIsVisible,
-  makeClassifierBasicLearningValue
+  makeClassifierBasicLearningValue,
+  makeClassifierInputNumberVal,
+  makePeriodicityVal
 }

@@ -58,7 +58,7 @@ import weka.filters.unsupervised.attribute.Remove;
 @Slf4j
 @RestController
 @RequestMapping(value = Constants.BASE_API_PATH + "/forecasting", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-public class ForecastingController extends BaseController {
+public class ForecastingController1 extends BaseController {
 
     @Autowired
     private SourceService sourceService;

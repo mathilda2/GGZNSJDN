@@ -9,7 +9,9 @@ import {
   startClassifierLoaded,
   changeTabActiveKeySuccess,
   changeBasicLearningModalSuccess,
-  changeBasicLearningInputValueSuccess
+  changeBasicLearningInputValueSuccess,
+  changeInputNumberSuccess,
+  handlePeriodicitySuccess
 } from './actions'
 //yzh
 export function* getClassifier(action): IterableIterator<any>{
@@ -49,12 +51,20 @@ export function* changeBasicLearningModal(defaultKey): IterableIterator<any>{
 export function* changeBasicLearningInputValue(value): IterableIterator<any>{
     yield put(changeBasicLearningInputValueSuccess(value))
 }
+export function* changeInputNumber(value):IterableIterator<any>{
+    yield put(changeInputNumberSuccess(value))
+}
+export function* handlePeriodicity(value):IterableIterator<any>{
+    yield put(handlePeriodicitySuccess(value))
+}
 export default function* rootClassifierSaga (): IterableIterator<any> {
   yield [
     takeLatest(ActionTypes.LOAD_CLASSIFIER, getClassifier),//yzh
     takeEvery(ActionTypes.START_CLASSIFIER,startClassifier),
     takeEvery(ActionTypes.CHANGE_TAB_ACTIVE_KEY,changeTabActiveKey),
     takeEvery(ActionTypes.CHANGE_BASIC_LEARNING_MODAL,changeBasicLearningModal),
-    takeEvery(ActionTypes.CHANGE_BASIC_LEARNING_INPUTVALUE,changeBasicLearningInputValue)
+    takeEvery(ActionTypes.CHANGE_BASIC_LEARNING_INPUTVALUE,changeBasicLearningInputValue),
+    takeEvery(ActionTypes.CHANGE_INPUT_NUMBER,changeInputNumber),
+    takeEvery(ActionTypes.HANDLE_PERIODI_CITY,handlePeriodicity)
   ]
 }

@@ -18,13 +18,13 @@ const Col = require('antd/lib/col')
 const Breadcrumb = require('antd/lib/breadcrumb')
 const utilStyles = require('../../assets/less/util.less')
 import Container from '../../components/Container'
-import {makeNewClassifier,makeClassifierTabsActiveKey,makeClassifierIsVisible,makeClassifierBasicLearningValue} from './selectors'
+import {makeNewClassifier,makeClassifierTabsActiveKey,makeClassifierIsVisible,makeClassifierBasicLearningValue,makeClassifierInputNumberVal,makePeriodicityVal} from './selectors'
 import { Button ,Modal} from 'antd';
 import { Input } from 'antd';
 import { Checkbox } from 'antd';
 import { Select } from 'antd';
 import { Card } from 'antd';
-import { startClassifier,loadClassifier,changeTabActiveKeyLoad,changeBasicLearningModal,changeBasicLearningInputValue} from './actions';
+import { startClassifier,loadClassifier,changeTabActiveKeyLoad,changeBasicLearningModal,changeBasicLearningInputValue,changeInputNumber,handlePeriodicity} from './actions';
 import { Tabs } from 'antd';
 import { Table } from 'antd';
 import { InputNumber } from 'antd';
@@ -48,14 +48,18 @@ interface IVizProps extends RouteComponentProps<{}, IParams> {
   classifier:any //yzh
   forecasting:any//yzh
   onLoadClassifier:(projectId) =>void //yzh
-  onstartClassifier:(projectId:any,basicVal:any) => void
+  onstartClassifier:(projectId:any,basicVal:any,inputNumberVal:any,periodicityVal:any) => void
   tabChangeCallback:(objectValue)=>void
   onChangeTabActiveKeyLoad:(key)=>void
   defaultKey:any
   isVisible:any
   onChangeBasicLearningModal:(isVisible)=>void
   basicLearningInputValue:any
+  inputNumberVal:any
+  periodicityVal:any
   onChangeBasicLearningInputValue:(value)=>void
+  onChangeInputNumber:(value)=>void
+  onhandlePeriodicity:(value)=>void
 }
 
 interface IVizStates {
@@ -153,7 +157,7 @@ export class Classifier extends React.Component<IVizProps, IVizStates> {
                               <tr>
                                 <td>要预测的时间单位数</td>
                                 <td>
-                                  <InputNumber size="small" min={1} max={100} defaultValue={1}  />
+                                  <InputNumber size="small" min={1} max={100} defaultValue={1}  onChange={this.onChangeInputNumber}  />
                                 </td>
                               </tr>
                               <tr>
@@ -168,39 +172,15 @@ export class Classifier extends React.Component<IVizProps, IVizStates> {
                               <tr>
                                 <td>周期性</td>
                                 <td>
-                                  <Select defaultValue="lucy" style={{ width: '100%' }} >
-                                    <Option value="jack">Hourly</Option>
-                                    <Option value="lucy">Daily</Option>
-                                    <Option value="lucy">Weekly</Option>
-                                    <Option value="lucy">Monthly</Option>
-                                    <Option value="lucy">Quarterly</Option>
-                                    <Option value="lucy">Yearly</Option>
+                                  <Select defaultValue="Monthly" style={{ width: '100%' }} onChange={this.onhandlePeriodicity}>
+                                    <Option value="Hourly">Hourly</Option>
+                                    <Option value="Daily">Daily</Option>
+                                    <Option value="Weekly">Weekly</Option>
+                                    <Option value="Monthly">Monthly</Option>
+                                    <Option value="Quarterly">Quarterly</Option>
+                                    <Option value="Yearly">Yearly</Option>
                                   </Select>
                                 </td>
-                              </tr>
-                              <tr>
-                                <td>跳过清单</td>
-                                <td>
-                                  <Input   placeholder="" />
-                                </td> 
-                              </tr>
-                              <tr>
-                                <td>置信区间</td>
-                                <td>
-                                  <Checkbox ></Checkbox>
-                                </td> 
-                              </tr>
-                              <tr>
-                                <td></td>
-                                <td>
-                                                                    级别%<InputNumber size="small" min={1} max={100} defaultValue={1}  />
-                                </td> 
-                              </tr>
-                              <tr>
-                                <td> 进行评估</td>
-                                <td>
-                                  <Checkbox ></Checkbox>
-                                </td> 
                               </tr>
                             </tbody>
                           </table>
@@ -328,11 +308,20 @@ export class Classifier extends React.Component<IVizProps, IVizStates> {
       </Container>
     )
   }
+  
   startClassifierOk=(e)=>{
     console.log(this.props+"--------------------this.props");
-    const { onstartClassifier,params,basicLearningInputValue} = this.props;
+    const { onstartClassifier,params,basicLearningInputValue,inputNumberVal,periodicityVal} = this.props;
     const projectId = params.pid;
-    onstartClassifier(projectId,basicLearningInputValue);
+    onstartClassifier(projectId,basicLearningInputValue,inputNumberVal,periodicityVal);
+  }
+  onChangeInputNumber=(e)=>{
+      const {onChangeInputNumber} = this.props;
+      onChangeInputNumber(e);
+  }
+  onhandlePeriodicity=(e)=>{
+      const {onhandlePeriodicity} = this.props;
+      onhandlePeriodicity(e);
   }
   handleOk = (e) => {
      const {onChangeBasicLearningModal} = this.props;
@@ -429,7 +418,9 @@ const mapStateToProps = createStructuredSelector({
   classifier : makeNewClassifier(),
   defaultKey :makeClassifierTabsActiveKey(),
   isVisible:makeClassifierIsVisible(),
-  basicLearningInputValue:makeClassifierBasicLearningValue()
+  basicLearningInputValue:makeClassifierBasicLearningValue(),
+  inputNumberVal:makeClassifierInputNumberVal(),
+  periodicityVal:makePeriodicityVal()
 })
 
 export function mapDispatchToProps (dispatch) {
@@ -437,10 +428,12 @@ export function mapDispatchToProps (dispatch) {
     onLoadDisplays: (projectId) => dispatch(loadDisplays(projectId)),
      //yzh
     onLoadClassifier:(projectId)=>dispatch(loadClassifier(projectId)),
-    onstartClassifier:(projectId,basicLearningInputValue)=>dispatch(startClassifier(projectId,basicLearningInputValue)),
+    onstartClassifier:(projectId,basicLearningInputValue,inputNumberVal,periodicityVal)=>dispatch(startClassifier(projectId,basicLearningInputValue,inputNumberVal,periodicityVal)),
     onChangeTabActiveKeyLoad:(key)=>dispatch(changeTabActiveKeyLoad(key)),
     onChangeBasicLearningModal:(isVisible)=>dispatch(changeBasicLearningModal(isVisible)),
-    onChangeBasicLearningInputValue:(value)=>dispatch(changeBasicLearningInputValue(value))
+    onChangeBasicLearningInputValue:(value)=>dispatch(changeBasicLearningInputValue(value)),
+    onChangeInputNumber:(value)=>dispatch(changeInputNumber(value)),
+    onhandlePeriodicity:(value)=>dispatch(handlePeriodicity(value)),
   }
 }
 

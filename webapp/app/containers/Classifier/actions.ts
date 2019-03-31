@@ -26,12 +26,14 @@ export function loadClassifierFail(error){
     }
   }
 }
-export function startClassifier(projectId,basicLearningInputValue){
+export function startClassifier(projectId,basicLearningInputValue,inputNumberVal,periodicityVal){
   return {
     type:ActionTypes.START_CLASSIFIER,
     payload:{
       projectId,
-      basicLearningInputValue
+      basicLearningInputValue,
+      inputNumberVal,
+      periodicityVal
     }
   }
 }
@@ -82,4 +84,28 @@ export function changeBasicLearningInputValueSuccess(value){
     type:ActionTypes.CHANGE_BASIC_LEARNING_INPUTVALUE_SUCCESS,
     basicLearningValue:value
   }
+}
+export function changeInputNumber(value){
+    return {
+      type:ActionTypes.CHANGE_INPUT_NUMBER,
+      inputNumberVal:value
+    }
+}
+export function changeInputNumberSuccess(value){
+    return {
+      type:ActionTypes.CHANGE_INPUT_NUMBER_SUCCESS,
+      inputNumberVal:value
+    }
+}
+export function handlePeriodicity(value){
+    return {
+      type:ActionTypes.HANDLE_PERIODI_CITY,
+      periodicityVal:value
+    }
+}
+export function handlePeriodicitySuccess(value){
+    return {
+      type:ActionTypes.HANDLE_PERIODI_CITY_SUCCESS,
+      periodicityVal:value
+    }
 }
