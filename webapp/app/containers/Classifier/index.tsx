@@ -348,7 +348,7 @@ export class Classifier extends React.Component<IVizProps, IVizStates> {
       onChangeBasicLearningInputValue(info.node.props.title);
     }
   public tabChangeCallback(key) {
-    const {classifier,onChangeTabActiveKeyLoad} = this.props;
+    const {classifier,onChangeTabActiveKeyLoad,inputNumberVal} = this.props;
     onChangeTabActiveKeyLoad(key);
     if(classifier.projectId==undefined){
       return;
@@ -397,12 +397,18 @@ export class Classifier extends React.Component<IVizProps, IVizStates> {
             var futurearr = [];
             var xlist1  = JSON.parse(JSON.stringify(xlist));
             var xlist2 = JSON.parse(JSON.stringify(xlist));
-            nowarr = xlist1.splice(0,xlist1.length-1);
-            nowarr.push("-");
-            for(var i = 0 ; i < xlist2.length-1 ; i ++){
+            nowarr = xlist1.splice(0,xlist1.length-inputNumberVal);
+            console.log(inputNumberVal);
+            for(var i = 0 ; i < inputNumberVal ; i ++){
+                nowarr.push("-");
+            }
+            for(var i = 0 ; i < xlist2.length-inputNumberVal ; i ++){
               futurearr.push("-");
             }
-            futurearr.push(xlist2.splice(xlist2.length-1)[0]);
+            var xlist1remain =xlist2.splice(xlist2.length-inputNumberVal);
+            for(var i = 0 ; i < xlist1remain.length ; i ++){
+                futurearr.push(xlist1remain[i]);
+            }
             option.series[0].data =futurearr// [4, 8,64,56,'-'];
             option.series[1].data =nowarr// ['-','-','-','-',256];
             myChart.setOption(option, true);
