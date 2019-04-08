@@ -8,7 +8,8 @@ import {
 import {
   loadForecastingFail,
   loadForecastingLoaded,
-  startClassifierDataLoaded
+  startClassifierDataLoaded,
+  changeViewTreeModalSuccess
 } from './actions'
 //yzh
 export function* getForecasting(action): IterableIterator<any>{
@@ -30,10 +31,14 @@ try {
     yield put(loadForecastingFail(err))
   }
 }
-
+export function* changeViewTreeModal(value): IterableIterator<any>{
+    yield put(changeViewTreeModalSuccess(value))
+}
 export default function* rootForecaseSaga (): IterableIterator<any> {
   yield [
     takeLatest(ActionTypes.LOAD_FORECASTING, getForecasting),//yzh
-    takeEvery(ActionTypes.startClassifierData,startClassifierData)
+    takeEvery(ActionTypes.startClassifierData,startClassifierData),
+    takeEvery(ActionTypes.CHANGE_VIEW_TREE_MODAL,changeViewTreeModal)
+    
   ]
 }

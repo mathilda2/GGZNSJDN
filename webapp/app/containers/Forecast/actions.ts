@@ -42,3 +42,31 @@ export function startClassifierDataLoaded(projectId){
     }
   }
 }
+export function changeViewTreeModal(isVisible){
+    return {
+      type:ActionTypes.CHANGE_VIEW_TREE_MODAL,
+      isVisible:isVisible
+    }
+}
+export function changeViewTreeModalSuccess(isVisible){
+    return {
+      type:ActionTypes.CHANGE_VIEW_TREE_MODAL_SUCCESS,
+      isVisible:isVisible
+    }
+  }
+export function viewTree(projectId){
+    return {
+      type:ActionTypes.VIEW_TREE,
+      payload:{
+        projectId
+      }
+    }
+  }
+export function viewTreeSuccess(projectId){
+    return {
+      type:ActionTypes.VIEW_TREE_SUCCESS,
+      payload:{
+        projectId
+      }
+    }
+  }

@@ -72,6 +72,8 @@ import weka.core.converters.ConverterUtils.DataSource;
 import weka.filters.supervised.attribute.TSLagMaker;
 import weka.gui.Logger;
 import weka.gui.TaskLogger;
+import net.sf.json.JSONObject;
+
 
 @Api(value = "/classifier", tags = "classifier", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
 @ApiResponses(@ApiResponse(code = 404, message = "classifier not found"))
@@ -105,6 +107,7 @@ public class ClassifierController extends BaseController {
     protected Thread m_runThread;
     List<String> xList = new ArrayList<>();
     List<String> yList = new ArrayList<>();
+    int inputNumberVal = 1 ;
     String result = "";
     @ResponseBody
     @PostMapping("/startClassifier")
@@ -129,8 +132,12 @@ public class ClassifierController extends BaseController {
         ylist.add("高跟鞋");
         ylist.add("袜子");
         map.put("ylist", ylist);*/
+    	int horizon = 0;
+    	JSONObject jsonObject = JSONObject.fromObject(params);
+		String inputNumberVal1 = jsonObject.getString("inputNumberVal");
     	WekaForecaster m_threadForecaster = new WekaForecaster();
-    	m_runThread = new ForecastingThread(m_threadForecaster, null,"MultilayerPerceptron"); 
+    	 inputNumberVal = Integer.parseInt(inputNumberVal1) ;
+    	m_runThread = new ForecastingThread(m_threadForecaster, null,"MultilayerPerceptron",Integer.parseInt(inputNumberVal1)); 
 
         m_runThread.setPriority(Thread.MIN_PRIORITY);
         m_runThread.run();
@@ -152,10 +159,12 @@ public class ClassifierController extends BaseController {
 	    protected WekaForecaster m_threadForecaster = null;
 	    protected String m_name;
 	    protected String algorithmClass = "";
-	    public ForecastingThread(WekaForecaster forecaster, String name,String algorithmClass) {
+	    protected int horizon = 0;
+	    public ForecastingThread(WekaForecaster forecaster, String name,String algorithmClass,int horizon) {
 	      m_threadForecaster = forecaster;
 	      m_name = name;
 	      algorithmClass = algorithmClass;
+	      horizon = horizon;
 	    }
 	    public void setConfigureAndBuild(boolean configAndBuild) {
 	      m_configAndBuild = configAndBuild;
@@ -187,7 +196,7 @@ public class ClassifierController extends BaseController {
 		        //将算法通过反射的形式弄进来 MultilayerPerceptron
 		       String className = "weka.classifiers.functions."+"MultilayerPerceptron";
 		        Classifier clazz = (Classifier) WekaPackageClassLoaderManager.forName(className).newInstance();
-		        String options = "-L 0.36 -M 0.2 -N 500 -V 0 -S 0 -E 20 -H a";
+		        String options = "-L 0.3 -M 0.2 -N 500 -V 0 -S 0 -E 20 -H a";
 		        String[] arr = Utils.splitOptions(options);
 		        ((OptionHandler) clazz).setOptions(arr);
 		        
@@ -197,7 +206,7 @@ public class ClassifierController extends BaseController {
 		        //output选项卡最下面的两个checkbox
 		        //m_advancedConfigPanel .getOutputFuturePredictions() || m_advancedConfigPanel.getGraphFuturePredictions()
 		        eval.setForecastFuture(true);
-		        
+		        eval.setHorizon(inputNumberVal);//yzh
 		        fname = m_threadForecaster.getAlgorithmName();
 		        if (m_name == null) {
 		            String algoName = fname.substring(0, fname.indexOf(' '));
@@ -315,7 +324,7 @@ public class ClassifierController extends BaseController {
 		}
 	    }
 
-	    eval.setHorizon(horizon);
+	   // eval.setHorizon(horizon);
 	    eval.setPrimeWindowSize(forecaster.getTSLagMaker().getMaxLag());
 	}
 

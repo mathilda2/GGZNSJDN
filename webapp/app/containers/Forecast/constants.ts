@@ -6,5 +6,9 @@ export enum ActionTypes {
   UNDO_OPERATION_SUCCESS = 'davinci/Forecast/UNDO_OPERATION_SUCCESS',
   REDO_OPERATION_SUCCESS = 'davinci/Forecast/REDO_OPERATION_SUCCESS',
   startClassifierData = 'davinci/Forecast/startClassifierData',
-  START_CLSSIFIER_DATA_SUCCESS = 'davinci/Forecast/START_CLSSIFIER_DATA_SUCCESS'
+  START_CLSSIFIER_DATA_SUCCESS = 'davinci/Forecast/START_CLSSIFIER_DATA_SUCCESS',
+  VIEW_TREE = 'davinci/Forecast/VIEW_TREE',
+  VIEW_TREE_SUCCESS = 'davinci/Forecast/VIEW_TREE_SUCCESS',
+  CHANGE_VIEW_TREE_MODAL = 'davinci/Forecast/CHANGE_VIEW_TREE_MODAL',
+  CHANGE_VIEW_TREE_MODAL_SUCCESS = 'davinci/Forecast/CHANGE_VIEW_TREE_MODAL_SUCCESS'
 }

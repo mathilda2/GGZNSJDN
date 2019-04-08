@@ -18,14 +18,17 @@ const Col = require('antd/lib/col')
 const Breadcrumb = require('antd/lib/breadcrumb')
 const utilStyles = require('../../assets/less/util.less')
 import Container from '../../components/Container'
-import {makeSelectClassifier} from './selectors'
-import { Button } from 'antd';
+import {makeSelectClassifier,makeClassifierIsVisible} from './selectors'
+import { Button,Modal } from 'antd';
 import { Input } from 'antd';
 import { Checkbox } from 'antd';
 import { Select } from 'antd';
 import { Card } from 'antd';
-import { startClassifierData} from './actions';
-
+import { startClassifierData,viewTree,changeViewTreeModal} from './actions';
+import * as  echartsT from 'echarts/lib/echarts';
+import  'echarts/lib/chart/bar';
+import 'echarts/lib/component/tooltip';
+import 'echarts/lib/component/title';
 interface IParams {
   pid: number
 }
@@ -35,10 +38,14 @@ interface IVizProps extends RouteComponentProps<{}, IParams> {
   forecasting:any//yzh
   onLoadForecasting:(projectId) =>void //yzh
   startClassifier:(projectId) => void
+  onViewTree:(projectId) => void
+  isVisibleTree:any
+  onChangeViewTreeModal:(isVisibleTree)=>void
 }
 
 interface IVizStates {
   collapse: {dashboard: boolean, display: boolean}
+  isVisibleTree:boolean
 }
 
 export class Forecast extends React.Component<IVizProps, IVizStates> {
@@ -49,21 +56,25 @@ export class Forecast extends React.Component<IVizProps, IVizStates> {
       collapse: {
         dashboard: true,
         display: true
-      }
+      },
+      isVisibleTree:false
     }
   }
 
   public componentWillMount () {
     const { params,  onLoadForecasting} = this.props
-    console.log(this.props.params.pid+"-----compddone");
     const projectId = params.pid
     onLoadForecasting(projectId);
   }
 
   public render () {
-    const { params,  forecasting,classifier} = this.props
-    console.log(this.props);
-    const projectId = params.pid
+    const { params,  forecasting,classifier,isVisibleTree} = this.props
+    const projectId = classifier.projectId;
+    console.log(isVisibleTree);
+    var resultClassifier = "";
+    if(projectId != "" && projectId !=null){
+        resultClassifier = projectId.resultClassifier;
+    }
     const Option = Select.Option;
     return (
       <Container>
@@ -144,10 +155,20 @@ export class Forecast extends React.Component<IVizProps, IVizStates> {
                   </tr>
                   <tr>
                     <td>
-                        <Button type="primary" size="small" style={{width:'100%'}} onClick={this.props.startClassifier}>Start</Button>
+                        <Button type="primary" size="small" style={{width:'100%'}} onClick={this.props.startClassifier}>开始分类</Button>
                     </td>
                     <td>
-                       <Button type="primary" size="small" style={{width:'100%'}}>Stop</Button>
+                       <Button type="primary" size="small" style={{width:'100%'}} onClick={this.onViewTree.bind(this)}>可视化结果</Button>
+                       <Modal
+                           title="分类决策树"
+                           visible={isVisibleTree}
+                           onOk={this.handleOk}
+                           onCancel={this.handleCancel}
+                           width={'1300px'}
+                           style={{marginTop:'-80px'}}
+                         >
+                       <div id="main" ref="lineEchart" style={{ width:'100%', height: '465px' }}></div>
+                     </Modal>
                     </td>
                   </tr>
                   </tbody>
@@ -156,7 +177,7 @@ export class Forecast extends React.Component<IVizProps, IVizStates> {
             </Col>
             <Col span={16}>
                 <Card title="Classifier output"   style={{ width: '100%' }}>
-                      <Input style={{minHeight:'260px',minWidth:'100%' }}  type="textarea"  value={classifier.projectId}  />
+                      <Input style={{minHeight:'260px',minWidth:'100%' }}  type="textarea"  value={resultClassifier}  />
                 </Card>
             </Col>
           </Row>
@@ -164,10 +185,72 @@ export class Forecast extends React.Component<IVizProps, IVizStates> {
       </Container>
     )
   }
+  onViewTree = () => { 
+      const {classifier,onChangeViewTreeModal} = this.props;
+      if(classifier.projectId==undefined){
+          return;
+      }
+      onChangeViewTreeModal(true);
+      var data = classifier.projectId.data;
+      var links = classifier.projectId.links.link;
+      setTimeout(() => {
+          var myChart = echartsT.init(document.getElementById('main') as HTMLDivElement);
+          var option = {
+                  title: {
+                      text: '分类决策树'
+                  },
+                  tooltip: {},
+                  animationDurationUpdate: 1500,
+                  animationEasingUpdate: 'quinticInOut',
+                  series : [
+                      {
+                          type: 'graph',
+                          layout: 'none',
+                          symbol:'circle',
+                          symbolSize: [120,31],
+                          roam: true,
+                          label: {
+                              normal: {
+                                  show: true
+                              }
+                          },
+                          edgeSymbol: ['circle', 'arrow'],
+                          edgeSymbolSize: [5, 15],
+                          edgeLabel: {
+                              normal: {
+                                  textStyle: {
+                                      fontSize: 14
+                                  }
+                              }
+                          },
+                          data: data,
+                          links: links,
+                          lineStyle: {
+                              normal: {
+                                  opacity: 0.9,
+                                  width: 2,
+                                  curveness: 0
+                              }
+                          }
+                      }
+                  ]
+              };
+           myChart.setOption(option);
+        },5);
+  }
+  handleOk = (e) => {
+      const {onChangeViewTreeModal} = this.props;
+      onChangeViewTreeModal(false);
+   }
+  handleCancel = (e) => {
+      const {onChangeViewTreeModal} = this.props;
+      onChangeViewTreeModal(false);
+  }
 }
 
 const mapStateToProps = createStructuredSelector({
-  classifier : makeSelectClassifier()
+  classifier : makeSelectClassifier(),
+  isVisibleTree:makeClassifierIsVisible(),
 })
 
 export function mapDispatchToProps (dispatch) {
@@ -175,7 +258,8 @@ export function mapDispatchToProps (dispatch) {
     onLoadDisplays: (projectId) => dispatch(loadDisplays(projectId)),
      //yzh
     onLoadForecasting:(projectId)=>dispatch(loadForecasting(projectId)),
-    startClassifier:(projectId)=>dispatch(startClassifierData(projectId))
+    startClassifier:(projectId)=>dispatch(startClassifierData(projectId)),
+    onChangeViewTreeModal:(isVisibleTree)=>dispatch(changeViewTreeModal(isVisibleTree))
   }
 }
 

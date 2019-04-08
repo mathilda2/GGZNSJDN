@@ -21,9 +21,13 @@ package edp.davinci;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -84,15 +88,19 @@ public class DavinciServerApplicationTests {
     	Map<String, Object>  mapOption = getMapOption(namelist);
     	Map<String, Object>  middleOption = getMapOption(middlelist);
     	List<Map<String, Object>> linksOptionlist = new ArrayList<Map<String, Object>>();
+    	List<Map<String, Object>> sourceOrtarget = new ArrayList<Map<String, Object>>();
     	Map<String, Object>  link = new HashMap<String, Object>();
     	for(Map.Entry<String, Object> entry : middleOption.entrySet()){
     		Map<String, Object>  linksOption = new HashMap<String, Object>();
+    		Map<String, Object>  sOrTMap = new HashMap<String, Object>();
     		String key = entry.getKey();
     		String value = (String) entry.getValue();
     		String sourceKey = key.split("->")[0].trim();
     		String targetKey = key.split("->")[1].trim();
     		String sourceValue = (String) mapOption.get(sourceKey);
     		String targetValue = (String) mapOption.get(targetKey);
+    		sOrTMap.put("source", sourceKey);
+    		sOrTMap.put("target", targetKey);
     		linksOption.put("source", sourceValue);
     		linksOption.put("target", targetValue);
     		Map<String, Object>  normalMap = new HashMap<String, Object>();
@@ -103,28 +111,155 @@ public class DavinciServerApplicationTests {
     		normalMap.put("normal", normalcontentMap);
     		linksOption.put("label", normalMap);
     		linksOptionlist.add(linksOption);
+    		sourceOrtarget.add(sOrTMap);
     	}
     	link.put("link", linksOptionlist);
+    	//获取层级d
+    	int level = getLevel(sourceOrtarget);
     	//拼接x轴了么
-    	int level = 3;
     	int xWidth = 100;
     	int yHeight = 100;
-    	/*Map crr[][] = new HashMap[][]{
-    		new HashMap[]{new HashMap(300,0)},
-    		new HashMap[]{new HashMap(100,100),new HashMap(500,100)},
-    		new HashMap[]{new HashMap(0,200),new HashMap(200,200),new HashMap(400,200),new HashMap(600,200)}
-    	};
-    	for(int i = 0 ; i < level ; i++){
-    		System.out.println(crr);
-    	}*/
-    	int[] a = new int[]{1,2,3,'#','#','#','#','#' };
-    	System.out.println(Arrays.toString(a));
+    	List<List<Map<String,Object>>> list = new ArrayList<List<Map<String,Object>>>();
+    	List<List<Map<String,Object>>> listlistZmap = new ArrayList<List<Map<String,Object>>>();
+    	for(int j = level ; j >= 0 ; j--) {
+	    	List<Map<String,Object>> listC = new ArrayList<Map<String,Object>>();
+	    	List<Map<String,Object>> listZmap = new ArrayList<Map<String,Object>>();
+	    	for(int i = 0 ; i < Math.pow(2, j) ; i++) {
+	    		Map<String,Object> zMap = new HashMap<String,Object>();
+	    		Map<String,Object> map = new LinkedHashMap<String,Object>();
+	    		map.put("name", "");
+    			map.put("x", i*xWidth);
+    			map.put("y", (j+1)*yHeight);
+	    		listC.add(map);
+	    		if((i+1) % 2 == 0) {
+	    			zMap.put("z",((i-1)*xWidth+i*xWidth)/2);
+	    			listZmap.add(zMap);
+	    		}
+	    	}
+	    	listlistZmap.add(listZmap);
+	    	list.add(listC);
+    	}
+    	List<Map<String,Object>> maplist = listlistZmap.get(0);
+    	list1.add(maplist);
+    	List<List<Map<String,Object>>> sss = calculate(maplist);
+    	for(int i = 1 ; i < list.size() ; i++) {
+    		for(int j = 0 ; j < list.get(i).size(); j++) {
+    			for(int k = 0 ; k < sss.size(); k++) {
+    				for(int l = 0 ; l < sss.get(k).size(); l++) {
+        				if(i-1==k && j==l) {
+        					Map<String, Object> map = list.get(i).get(j);
+        					Map<String, Object> map2 = sss.get(k).get(l);
+        					map.put("x", map2.get("z"));
+        				}
+                	}	
+            	}	
+        	}
+    	}
+    	List<Map<String,Object>> nlist = new ArrayList<Map<String,Object>>();
+    	Map<String,Object> mapC = new HashMap<String,Object>();
+    	mapC.put("name", "N0");
+    	mapC.put("idx", 0);
+    	nlist.add(mapC);
+    	Map<String,Object> treeMap = new HashMap<String,Object>();
+		treeMap.put("name", "N0");
+		treeMap.put("idx", 0);
+		treeMap.put("level", 0);
+		treelistMapTotal.add(treeMap);
+    	divideMap(nlist,sourceOrtarget,0,0);
+    	//开始替换
+    	for(int i = 0 ; i < treelistMapTotal.size() ; i++) {
+    		Map<String,Object> m = treelistMapTotal.get(i);
+    		int idx = (int) m.get("idx");
+    		int childlevel = (int) m.get("level");
+    		String name = (String) m.get("name");
+    		Map<String,Object> med = list.get(list.size()-childlevel-1).get(idx);
+    		med.put("name", m.get("name"));
+    	}
+    	//开始删除多余没有name的
+    	Iterator<List<Map<String, Object>>> it = list.iterator();
+    	while(it.hasNext()){
+    	    List<Map<String, Object>> x = it.next();
+    	    Iterator<Map<String, Object>> itx = x.iterator();
+    	    while(itx.hasNext()) {
+    	    	Map<String, Object> next = itx.next();
+    	    	String name = (String) next.get("name");
+    	    	if("".equals(name)||name==null) {
+    	    		itx.remove();
+    	    	}
+    	    }
+    	}
+    	//将二维数组放到一维中去
+    	List<Map<String,Object>> li = new ArrayList<Map<String,Object>>();
+		for(int j = 0 ; j < list.size() ; j++) {
+		    for(int k = 0 ; k < list.get(j).size() ; k++) {
+		    	Map<String,Object> map = list.get(j).get(k);
+		    	String name = (String) map.get("name");
+		    	map.put("name",mapOption.get(name));
+		    	li.add(list.get(j).get(k));
+		    }
+		}
+		Map<String,Object> result = new HashMap<String,Object>();
+		result.put("data", li);
+		result.put("links", link);
     }
-    
-    public static Map<String, Object> getMapOption(List<String> namelist){
+    public static int getLevel(List<Map<String, Object>> sourceOrtarget) {
+    	Set<String> set = new HashSet<String>();
+    	for(Map<String, Object> map : sourceOrtarget) {
+    		String source = (String) map.get("source");
+    		set.add(source);
+    	}
+    	int length = set.size();
+		return length;
+	}
+    static List<Map<String,Object>> treelistMapTotal = new ArrayList<Map<String,Object>>();
+    public static void divideMap(List<Map<String, Object>> nlist, List<Map<String, Object>> sourceOrtarget, int idx,int level) {
+    	List<Map<String,Object>> treelistMap = new ArrayList<Map<String,Object>>();
+    	++level;
+    	for(int i = 0 ; i < sourceOrtarget.size() ; i++) {
+    		Map<String,Object> m = sourceOrtarget.get(i);
+    		String source = (String) m.get("source");
+    		String target = (String) m.get("target");
+    		for(int k = 0 ; k < nlist.size() ; k++) {
+    			if(source.equals(nlist.get(k).get("name"))) {
+    				Map<String,Object> treeMap = new HashMap<String,Object>();
+					treeMap.put("name", target);
+					treeMap.put("idx", (Integer)nlist.get(k).get("idx")*2+idx);
+					treeMap.put("level", level);
+					treelistMap.add(treeMap);
+					treelistMapTotal.add(treeMap);
+					idx++;
+    			}
+			}
+    	}
+		if(treelistMap.size() > 0) {
+			divideMap(treelistMap, sourceOrtarget,idx=0,level);
+		}
+	}
+	static List<List<Map<String,Object>>> list1 = new ArrayList<List<Map<String,Object>>>();
+    public static List<List<Map<String,Object>>> calculate(List<Map<String, Object>> maplist) {
+    	List<Map<String, Object>> list = new ArrayList<Map<String, Object>>();
+    	 for(int i = 0 ; i < maplist.size() ; i++) {
+    		if(i % 2 == 0 && maplist.size()>1) {
+    			Map<String,Object> tMap = new HashMap<String,Object>();
+    			Map<String, Object> firstM = maplist.get(i);
+        		int a = (int) firstM.get("z");
+        		Map<String, Object> firstN = maplist.get(i+1);
+        		int b = (int) firstN.get("z");
+        		tMap.put("z", (a+b)/2);
+        		list.add(tMap);
+    		}
+    	}
+    	if(list.size() >= 1) {
+    		list1.add(list);
+    		calculate(list);
+    	} 
+		return list1;
+	}
+
+	public static Map<String, Object> getMapOption(List<String> namelist){
     	List<String> valList = new LinkedList<String>();
     	List<String> nameList = new LinkedList<String>();
-    	Map<String, Object> map = new HashMap<String, Object>();
+    	Map<String, Object> map = new LinkedHashMap<String, Object>();
     	for(String name : namelist){
     		nameList.add(name.split("\\[")[0].trim());
     		String valstr = name.split("\\[")[1];
@@ -145,6 +280,4 @@ public class DavinciServerApplicationTests {
     	}
 		return map;
     }
-    
-    
 }

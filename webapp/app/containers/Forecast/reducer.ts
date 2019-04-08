@@ -13,13 +13,16 @@ const initialState = fromJS({
 })
 
 function forecastingReducer (state = initialState, action) {
-  const { type, payload } = action
+  const { type, payload,isVisible} = action
 
   switch (type) {
     case ActionTypes.LOAD_FORECASTING_SUCCESS:
       return state.set('forecasting', payload.forecasting)
     case ActionTypes.START_CLSSIFIER_DATA_SUCCESS:
       return state.set('classifier',payload)
+    case ActionTypes.CHANGE_VIEW_TREE_MODAL_SUCCESS:
+        console.log(isVisible.isVisible,isVisible+"-----------------------");
+        return state.set('isVisibleTree',isVisible.isVisible)
     default:
       return state
   }

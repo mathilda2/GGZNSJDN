@@ -381,7 +381,7 @@ export class Classifier extends React.Component<IVizProps, IVizStates> {
               //   data: xlist//["112", "118", "132", "129", "121"]//xlist//
               // },
               {
-                name: '销量',
+                name: '预测销量',
                 type: 'line',
                 data: []//xlist//
               },
