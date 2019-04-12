@@ -95,6 +95,7 @@ export interface IProject {
     widgetPermission: number
     forecastingPermission:number//yzh
     classifierPermission:number
+    equipmentPermission:number
   }
   inTeam?: boolean
   isStar?: boolean

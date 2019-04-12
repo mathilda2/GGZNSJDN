@@ -42,6 +42,7 @@ public class ProjectPermission {
     
     private Short classifierPermission = 1;//yzh
 
+    private Short equipmentPermission = 1;
 
     public ProjectPermission() {
     }
@@ -54,6 +55,7 @@ public class ProjectPermission {
         this.schedulePermission = permission;
         this.forecastingPermission = permission;
         this.classifierPermission = permission;
+        this.equipmentPermission = permission;
     }
 
     public static ProjectPermission previewPermission() {
@@ -64,6 +66,7 @@ public class ProjectPermission {
         permission.setSourcePermission((short) 0);
         permission.setForecastingPermission((short) 0);//yzh
         permission.setClassifierPermission((short) 0);//yzh
+        permission.setEquipmentPermission((short) 0);//yzh
         permission.setSchedulePermission((short) 0);
         permission.setDownloadPermission(false);
         permission.setSharePermission(false);

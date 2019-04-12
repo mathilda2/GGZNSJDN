@@ -38,6 +38,7 @@ import Main from './containers/Main'
 import Schedule from './containers/Schedule'
 import Forecast from './containers/Forecast' //yzh
 import Classifier from './containers/Classifier' //yzh
+import Equipment from './containers/Equipment' //yzh
 import Editor from './containers/Display/Editor'
 import Preview from './containers/Display/Preview'
 import Account from './containers/Account'
@@ -145,8 +146,12 @@ export default function createRoutes (store): IExtendedRouteProps[] {
                path: '/project/:pid/classifier',
                name: 'classifier',
                component: Classifier
-            }
-            
+            },
+            { 
+                path: '/project/:pid/equipment',
+                name: 'equipment',
+                component: Equipment
+             }
           ]
         },
         {

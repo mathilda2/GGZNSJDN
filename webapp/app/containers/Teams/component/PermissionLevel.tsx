@@ -45,7 +45,8 @@ export class PermissionLevel extends React.PureComponent <IPermissionLevelProps,
       downloadPermission,
       schedulePermission ,
       forecastingPermission, //yzh
-      classifierPermission//yzh
+      classifierPermission,//yzh
+      equipmentPermission//yzh
     } = param
     this.props.form.setFieldsValue({
       id,
@@ -57,7 +58,8 @@ export class PermissionLevel extends React.PureComponent <IPermissionLevelProps,
       downloadPermission,
       schedulePermission,
       forecastingPermission, //yzh
-       classifierPermission//yzh
+       classifierPermission,//yzh
+       equipmentPermission
     })
   }
   public render () {

@@ -9,11 +9,12 @@ const initialState = fromJS({
   clipboardLayers: [],
   lastOperationType: '',
   lastLayers: [],
-  classifier:'' //yzh
+  classifier:'' ,//yzh
+  gojsStr:''
 })
 
 function forecastingReducer (state = initialState, action) {
-  const { type, payload,isVisible} = action
+  const { type, payload,isVisible,gojsStr} = action
 
   switch (type) {
     case ActionTypes.LOAD_FORECASTING_SUCCESS:
@@ -23,6 +24,9 @@ function forecastingReducer (state = initialState, action) {
     case ActionTypes.CHANGE_VIEW_TREE_MODAL_SUCCESS:
         console.log(isVisible.isVisible,isVisible+"-----------------------");
         return state.set('isVisibleTree',isVisible.isVisible)
+    case ActionTypes.UPDATE_GOJSVAL_SUCCESS:
+        console.log(gojsStr+"-----------------------");
+        return state.set('gojsStr',gojsStr)
     default:
       return state
   }

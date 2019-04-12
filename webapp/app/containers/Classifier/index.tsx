@@ -39,7 +39,7 @@ import  'echarts/lib/chart/bar';
 import 'echarts/lib/component/tooltip';
 import 'echarts/lib/component/title';
 import 'ztree/css/zTreeStyle/zTreeStyle.css';
-
+import GojsDiagram from 'react-gojs';
 interface IParams {
   pid: number
 }

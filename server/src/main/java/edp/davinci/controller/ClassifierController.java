@@ -108,6 +108,7 @@ public class ClassifierController extends BaseController {
     List<String> xList = new ArrayList<>();
     List<String> yList = new ArrayList<>();
     int inputNumberVal = 1 ;
+    String periodicityVal = "";
     String result = "";
     @ResponseBody
     @PostMapping("/startClassifier")
@@ -135,6 +136,7 @@ public class ClassifierController extends BaseController {
     	int horizon = 0;
     	JSONObject jsonObject = JSONObject.fromObject(params);
 		String inputNumberVal1 = jsonObject.getString("inputNumberVal");
+		periodicityVal = jsonObject.getString("periodicityVal");
     	WekaForecaster m_threadForecaster = new WekaForecaster();
     	 inputNumberVal = Integer.parseInt(inputNumberVal1) ;
     	m_runThread = new ForecastingThread(m_threadForecaster, null,"MultilayerPerceptron",Integer.parseInt(inputNumberVal1)); 
@@ -414,7 +416,7 @@ public class ClassifierController extends BaseController {
 		Instances m_instances=inst;
 	    //if (m_advancedConfig != null) {// 如果高级配置有没有东西
 	      String timeStampSelected = "时间";
-	      String selectedP = "<Detect automatically>";
+	      String selectedP =periodicityVal;// "Monthly";//"<Detect automatically>";
 	      if (selectedP.equals("<Detect automatically>")
 	        && !timeStampSelected.equals("<Use an artificial time index>")
 	        && !timeStampSelected.equals("<None>") && forecaster != null) {

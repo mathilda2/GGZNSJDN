@@ -18,17 +18,20 @@ const Col = require('antd/lib/col')
 const Breadcrumb = require('antd/lib/breadcrumb')
 const utilStyles = require('../../assets/less/util.less')
 import Container from '../../components/Container'
-import {makeSelectClassifier,makeClassifierIsVisible} from './selectors'
+import {makeSelectClassifier,makeClassifierIsVisible,makeClassifierGojsStr} from './selectors'
 import { Button,Modal } from 'antd';
 import { Input } from 'antd';
 import { Checkbox } from 'antd';
 import { Select } from 'antd';
 import { Card } from 'antd';
-import { startClassifierData,viewTree,changeViewTreeModal} from './actions';
+import { startClassifierData,viewTree,changeViewTreeModal,updateGojsVal} from './actions';
 import * as  echartsT from 'echarts/lib/echarts';
 import  'echarts/lib/chart/bar';
 import 'echarts/lib/component/tooltip';
 import 'echarts/lib/component/title';
+import { GojsDiagram } from "react-gojs/dist";
+import { Diagram } from "gojs/release/go";
+import * as go from "gojs/release/go";
 interface IParams {
   pid: number
 }
@@ -41,6 +44,8 @@ interface IVizProps extends RouteComponentProps<{}, IParams> {
   onViewTree:(projectId) => void
   isVisibleTree:any
   onChangeViewTreeModal:(isVisibleTree)=>void
+  onUpdateGojsVal:(gojsStr)=>void
+  gojsStr:any
 }
 
 interface IVizStates {
@@ -62,6 +67,7 @@ export class Forecast extends React.Component<IVizProps, IVizStates> {
   }
 
   public componentWillMount () {
+      
     const { params,  onLoadForecasting} = this.props
     const projectId = params.pid
     onLoadForecasting(projectId);
@@ -158,7 +164,7 @@ export class Forecast extends React.Component<IVizProps, IVizStates> {
                         <Button type="primary" size="small" style={{width:'100%'}} onClick={this.props.startClassifier}>开始分类</Button>
                     </td>
                     <td>
-                       <Button type="primary" size="small" style={{width:'100%'}} onClick={this.onViewTree.bind(this)}>可视化结果</Button>
+                       <Button type="primary" size="small" style={{width:'100%'}} onClick={this.onViewTreeGojs.bind(this)}>可视化结果</Button>
                        <Modal
                            title="分类决策树"
                            visible={isVisibleTree}
@@ -167,7 +173,11 @@ export class Forecast extends React.Component<IVizProps, IVizStates> {
                            width={'1300px'}
                            style={{marginTop:'-80px'}}
                          >
-                       <div id="main" ref="lineEchart" style={{ width:'100%', height: '465px' }}></div>
+                      
+                       <div id="myDiagramDivOfgoAgain" style={{ width:'1280px', height:'465px' }}>
+                          
+                       </div>
+                       
                      </Modal>
                     </td>
                   </tr>
@@ -185,7 +195,98 @@ export class Forecast extends React.Component<IVizProps, IVizStates> {
       </Container>
     )
   }
+  onViewTreeGojs = ()=>{
+      const {classifier,onChangeViewTreeModal,onUpdateGojsVal,gojsStr} = this.props;
+      if(classifier.projectId==undefined){
+          return;
+      }
+      var gojs = classifier.projectId.gojs;
+      var gojsStrNew = JSON.stringify(gojs);
+      var gojsStrOld = gojsStr.gojsStr;
+      console.log(gojsStrNew==gojsStrOld);
+      onChangeViewTreeModal(true);
+      if(gojsStrOld==gojsStrNew){
+          console.log("same ok");
+          return ;
+      }else{
+          onUpdateGojsVal(gojsStrNew);
+      }
+      
+      setTimeout(() => {
+          var $ = go.GraphObject.make;
+          var myDiagram =
+            $(go.Diagram, "myDiagramDivOfgoAgain",
+              {
+                initialContentAlignment: go.Spot.Center, // 居中显示内容
+                 "toolManager.mouseWheelBehavior": go.ToolManager.WheelZoom,
+                "undoManager.isEnabled": true, // 打开 Ctrl-Z 和 Ctrl-Y 撤销重做功能
+                layout: $(go.TreeLayout, // 1个特殊的树形排列 Diagram.layout布局
+                          { angle: 90, layerSpacing: 35 }),
+                allowMove:false
+              });
+          
+          // 我们早先定义的模板
+          myDiagram.nodeTemplate =
+            $(go.Node, "Auto",
+            // define the node's outer shape, which will surround the TextBlock
+            $(go.Shape, "RoundedRectangle",
+              {
+                parameter1: 20,  // the corner has a large radius
+                fill: $(go.Brush, "Linear", { 0: "rgb(254, 201, 0)", 1: "rgb(254, 162, 0)" }),
+                stroke: null,
+                portId: "",  // this Shape is the Node's port, not the whole Node
+              }),
+            $(go.TextBlock,
+              {
+                font: "bold 11pt helvetica, bold arial, sans-serif"
+              },
+              new go.Binding("text").makeTwoWay()),
+          );
+          
+          
+          myDiagram.linkTemplate =
+          $(go.Link,  // the whole link panel
+            {
+              toShortLength: 3
+            },
+            new go.Binding("points").makeTwoWay(),
+            new go.Binding("curviness"),
+            $(go.Shape,  // the link shape
+              { strokeWidth: 1.5 }),
+            $(go.Shape,  // the arrowhead
+              { toArrow: "standard", stroke: null }),
+            $(go.Panel, "Auto",
+              $(go.Shape,  // the label background, which becomes transparent around the edges
+                {
+                  fill: $(go.Brush, "Radial",
+                    { 0: "rgb(255, 255, 255)", 0.9: "rgb(255, 255, 255)", 1: "rgba(255, 255, 255, 0)" }),
+                  stroke: null
+                }),
+              $(go.TextBlock, "transition",  // the label text
+                {
+                  textAlign: "center",
+                  font: "9pt helvetica, arial, sans-serif",
+                  margin: 4,
+                },
+                // editing the text automatically updates the model data
+                new go.Binding("text","linkText").makeTwoWay())
+            )
+          );
+          
+          
+          var model = $(go.TreeModel);
+          model.nodeDataArray =gojs.nodeDataArray;
+         // model.fromJson(gojs);
+          console.log(gojs.nodeDataArray);
+         // go.Model.fromJson(gojs.nodeDataArray);
+         // myDiagram.model = go.Model.fromJson(gojs.nodeDataArray);
+          //myDiagram.layoutDiagram(true);
+          myDiagram.model = model;
+              
+      },200)
+  }
   onViewTree = () => { 
+     
       const {classifier,onChangeViewTreeModal} = this.props;
       if(classifier.projectId==undefined){
           return;
@@ -237,6 +338,8 @@ export class Forecast extends React.Component<IVizProps, IVizStates> {
               };
            myChart.setOption(option);
         },5);
+      
+     /*      <div id="main" ref="lineEchart" style={{ width:'100%', height: '465px' }}></div>*/
   }
   handleOk = (e) => {
       const {onChangeViewTreeModal} = this.props;
@@ -251,6 +354,7 @@ export class Forecast extends React.Component<IVizProps, IVizStates> {
 const mapStateToProps = createStructuredSelector({
   classifier : makeSelectClassifier(),
   isVisibleTree:makeClassifierIsVisible(),
+  gojsStr:makeClassifierGojsStr()
 })
 
 export function mapDispatchToProps (dispatch) {
@@ -259,7 +363,8 @@ export function mapDispatchToProps (dispatch) {
      //yzh
     onLoadForecasting:(projectId)=>dispatch(loadForecasting(projectId)),
     startClassifier:(projectId)=>dispatch(startClassifierData(projectId)),
-    onChangeViewTreeModal:(isVisibleTree)=>dispatch(changeViewTreeModal(isVisibleTree))
+    onChangeViewTreeModal:(isVisibleTree)=>dispatch(changeViewTreeModal(isVisibleTree)),
+    onUpdateGojsVal:(gojsStr)=>dispatch(updateGojsVal(gojsStr)),
   }
 }
 

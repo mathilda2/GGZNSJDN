@@ -227,6 +227,7 @@
     "react-color": "^2.13.8",
     "react-dom": "~15.6.1",
     "react-echarts": "^0.1.1",
+    "react-gojs": "^4.1.0",
     "react-helmet": "5.1.3",
     "react-intl": "2.3.0",
     "react-loadable": "4.0.3",

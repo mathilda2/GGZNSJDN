@@ -103,7 +103,8 @@ export class ProjectList extends React.PureComponent<IProjectListProps, IProject
         vizPermission,
         widgetPermission,
         forecastingPermission,//yzh
-         classifierPermission//yzh
+         classifierPermission,//yzh
+         equipmentPermission//yzh
       } = this[targetStr].getFieldsValue()
       onUpdateTeamProjectPermission(id, {
         downloadPermission,
@@ -114,7 +115,8 @@ export class ProjectList extends React.PureComponent<IProjectListProps, IProject
         vizPermission,
         widgetPermission,
         forecastingPermission,//yzh
-         classifierPermission//yzh
+         classifierPermission,//yzh
+         equipmentPermission
       })
     })
   }

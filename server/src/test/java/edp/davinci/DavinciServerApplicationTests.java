@@ -134,6 +134,7 @@ public class DavinciServerApplicationTests {
 	    		if((i+1) % 2 == 0) {
 	    			zMap.put("z",((i-1)*xWidth+i*xWidth)/2);
 	    			listZmap.add(zMap);
+	    			System.out.println(i);
 	    		}
 	    	}
 	    	listlistZmap.add(listZmap);

@@ -9,7 +9,8 @@ import {
   loadForecastingFail,
   loadForecastingLoaded,
   startClassifierDataLoaded,
-  changeViewTreeModalSuccess
+  changeViewTreeModalSuccess,
+  updateGojsValSuccess
 } from './actions'
 //yzh
 export function* getForecasting(action): IterableIterator<any>{
@@ -34,11 +35,15 @@ try {
 export function* changeViewTreeModal(value): IterableIterator<any>{
     yield put(changeViewTreeModalSuccess(value))
 }
+export function* updateGojsVal(value): IterableIterator<any>{
+    yield put(updateGojsValSuccess(value))
+}
 export default function* rootForecaseSaga (): IterableIterator<any> {
   yield [
     takeLatest(ActionTypes.LOAD_FORECASTING, getForecasting),//yzh
     takeEvery(ActionTypes.startClassifierData,startClassifierData),
-    takeEvery(ActionTypes.CHANGE_VIEW_TREE_MODAL,changeViewTreeModal)
+    takeEvery(ActionTypes.CHANGE_VIEW_TREE_MODAL,changeViewTreeModal),
+    takeEvery(ActionTypes.UPDATE_GOJSVAL,updateGojsVal),
     
   ]
 }

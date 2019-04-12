@@ -90,6 +90,7 @@ export interface ITeamProjects {
   widgetPermission: number
   forecastingPermission:number//yzh
    classifierPermission:number//yzh
+   equipmentPermission:number//yzh
 }
 
 export interface ITeamTeams {

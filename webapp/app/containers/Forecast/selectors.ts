@@ -10,8 +10,13 @@ const makeClassifierIsVisible = () => createSelector(
   selectForecasting,
   ({ present }) => present.get('isVisibleTree')
 )
+const makeClassifierGojsStr = () => createSelector(
+  selectForecasting,
+  ({ present }) => present.get('gojsStr')
+)
 export {
   selectForecasting,
   makeSelectClassifier,
-  makeClassifierIsVisible
+  makeClassifierIsVisible,
+  makeClassifierGojsStr
 }

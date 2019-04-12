@@ -4,7 +4,7 @@ public class Main {
 
 	 public static void main(String[] args) {
 
-	  BinaryTree tree = new BinaryTree();
+	 /* BinaryTree tree = new BinaryTree();
 	  // 添加数据测试
 	  tree.insert(10);
 	  tree.insert(40);
@@ -22,7 +22,7 @@ public class Main {
 	   System.out.println("找到了");
 	  } else {
 	   System.out.println("没找到");
-	  }
+	  }*/
 	  // 删除测试
 	/*  tree.find(40).setDelete(true);
 
@@ -32,6 +32,12 @@ public class Main {
 	   System.out.println("没找到");
 	  }
 */
+		 long start = System.currentTimeMillis();
+		 for(int i = 0 ; i < 16777216 ; i++) {
+			 System.out.println(i);
+		 }
+		 long end = System.currentTimeMillis();
+		 System.out.println(end-start);
 	 }
 
 	}

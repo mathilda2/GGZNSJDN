@@ -152,7 +152,8 @@ export function mapDispatchToProps (dispatch) {
         { icon: 'icon-datasource24', route: ['sources'], permission: 'source' },
         { icon: 'anticon anticon-clock-circle-o', route: ['schedule'], permission: 'schedule' },
         { icon: 'iconfont icon-china', route: ['forecasting'], permission: 'forecasting' }, //yzh 
-        { icon: 'iconfont icon-heart', route: ['classifier'], permission: 'classifier' } //yzh
+        { icon: 'iconfont icon-heart', route: ['classifier'], permission: 'classifier' }, //yzh
+        { icon: 'iconfont icon-video', route: ['equipment'], permission: 'equipment' } //yzh
       ]
       dispatch(loadSidebar(sidebarSource))
     },

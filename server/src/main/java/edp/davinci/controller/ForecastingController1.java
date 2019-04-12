@@ -22,6 +22,7 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
@@ -41,6 +42,7 @@ import edp.davinci.common.controller.BaseController;
 import edp.davinci.core.common.Constants;
 import edp.davinci.core.common.ResultMap;
 import edp.davinci.databrain.algorithm.ParseWekaStyleToMap;
+import edp.davinci.databrain.algorithm.ParseWekaStyleToMapOfGojs;
 import edp.davinci.model.User;
 import edp.davinci.service.SourceService;
 import io.swagger.annotations.Api;
@@ -137,7 +139,7 @@ public class ForecastingController1 extends BaseController {
                 System.out.println(eval.toClassDetailsString("===Detailed Accuracy By Class==="));
                 System.out.println(eval.toMatrixString("=== Confusion Matrix ===\n"));//Confusion Matrix
                 String grph = ((Drawable) m_classifier).graph();
-                Map<String, Object> finalMap = ParseWekaStyleToMap.getFinalMap(grph);
+                Map<String, Object> finalMap = ParseWekaStyleToMapOfGojs.getFinalMap(grph);
                 finalMap.put("resultClassifier", resultstr);
 		return ResponseEntity.status(200).body(finalMap);
 	}

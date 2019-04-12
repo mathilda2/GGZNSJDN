@@ -70,3 +70,15 @@ export function viewTreeSuccess(projectId){
       }
     }
   }
+export function updateGojsVal(gojsStr){
+    return {
+      type:ActionTypes.UPDATE_GOJSVAL,
+      gojsStr
+    }
+  }
+export function updateGojsValSuccess(gojsStr){
+    return {
+      type:ActionTypes.UPDATE_GOJSVAL_SUCCESS,
+      gojsStr
+    }
+  }
