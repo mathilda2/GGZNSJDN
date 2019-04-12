@@ -1,0 +1,332 @@
+import * as React from 'react'
+import Helmet from 'react-helmet'
+import { Link, RouteComponentProps } from 'react-router'
+import { compose } from 'redux'
+import { connect } from 'react-redux'
+import { createStructuredSelector } from 'reselect'
+import injectReducer from 'utils/injectReducer'
+import injectSaga from 'utils/injectSaga'
+import displayReducer from '../Display/reducer'
+import displaySaga from '../Display/sagas'
+import classifierSaga from './sagas' ;//yzh
+import classifierReducer from './reducer';
+import portalSaga from '../Portal/sagas'
+import portalReducer from '../Portal/reducer'
+import { loadDisplays } from '../Display/actions'
+const Row = require('antd/lib/row')
+const Col = require('antd/lib/col')
+const Breadcrumb = require('antd/lib/breadcrumb')
+const utilStyles = require('../../assets/less/util.less')
+import Container from '../../components/Container'
+import {makeNewClassifier,makeClassifierTabsActiveKey,makeClassifierIsVisible,makeClassifierBasicLearningValue,makeClassifierInputNumberVal,makePeriodicityVal} from './selectors'
+import { Button ,Modal} from 'antd';
+import { Input } from 'antd';
+import { Checkbox } from 'antd';
+import { Select } from 'antd';
+import { Card } from 'antd';
+import { startClassifier,loadClassifier,changeTabActiveKeyLoad,changeBasicLearningModal,changeBasicLearningInputValue,changeInputNumber,handlePeriodicity} from './actions';
+import { Tabs } from 'antd';
+import { Table } from 'antd';
+import { InputNumber } from 'antd';
+import $ from 'jquery';
+import zTree from 'zTree';
+import { Tree } from 'antd';
+// 引入 ECharts 主模块
+import * as  echartsT from 'echarts/lib/echarts';
+// 引入柱状图
+import  'echarts/lib/chart/bar';
+// 引入提示框和标题组件
+import 'echarts/lib/component/tooltip';
+import 'echarts/lib/component/title';
+import 'ztree/css/zTreeStyle/zTreeStyle.css';
+import GojsDiagram from 'react-gojs';
+interface IParams {
+  pid: number
+}
+
+interface IVizProps extends RouteComponentProps<{}, IParams> {
+  classifier:any //yzh
+  forecasting:any//yzh
+  onLoadClassifier:(projectId) =>void //yzh
+  onstartClassifier:(projectId:any,basicVal:any,inputNumberVal:any,periodicityVal:any) => void
+  tabChangeCallback:(objectValue)=>void
+  onChangeTabActiveKeyLoad:(key)=>void
+  defaultKey:any
+  isVisible:any
+  onChangeBasicLearningModal:(isVisible)=>void
+  basicLearningInputValue:any
+  inputNumberVal:any
+  periodicityVal:any
+  onChangeBasicLearningInputValue:(value)=>void
+  onChangeInputNumber:(value)=>void
+  onhandlePeriodicity:(value)=>void
+}
+
+interface IVizStates {
+  collapse: {dashboard: boolean, display: boolean}
+  defaultKey:string
+  isVisible:boolean
+  basicLearningInputValue:string
+}
+
+export class Equipment extends React.Component<IVizProps, IVizStates> {
+
+  constructor (props: IVizProps) {
+    super(props)
+    this.state = {
+      collapse: {
+        dashboard: true,
+        display: true
+      } ,
+      defaultKey:"1",
+      isVisible:false,
+      basicLearningInputValue:""
+    }
+  }
+   
+  public componentWillMount () {
+    const { params,  onLoadClassifier} = this.props
+    const projectId = params.pid
+    onLoadClassifier(projectId);
+  }
+  public render () {
+    const { params,classifier,defaultKey,isVisible,basicLearningInputValue} = this.props
+    const projectId = params.pid
+    const Option = Select.Option;
+    const TabPane = Tabs.TabPane;
+    var defaultKeyTab = "";
+    if(defaultKey==undefined || defaultKey=="1"){
+      defaultKeyTab = "1";
+    }else{
+      defaultKeyTab = defaultKey.payload.defaultKey;
+    }
+    const basicLearningInputVal =basicLearningInputValue;
+    var content = "";
+    if(classifier.projectId!=undefined){
+      content = "xList:"+classifier.projectId.xList +"\n ylist:"+ classifier.projectId.ylist;
+    }
+    const columns = [{
+      title: '名称',
+      dataIndex: 'name'
+    }];
+    const data = [{key: '1',name: '乘客数量'}];
+    const { TreeNode } = Tree;
+    const rowSelection = {
+      onChange: (selectedRowKeys, selectedRows) => {
+        console.log(`selectedRowKeys1: ${selectedRowKeys}`, 'selectedRows: ', selectedRows);
+      }
+    }
+    
+    return (
+      <Container>
+        <Container.Body>
+          <Row>
+                <Row>
+                  <Col span={18}>
+                      <Card title="目标选择"  style={{ width: '100%' }}>
+                        <Row  gutter={16}>
+                          <Col span={6}><Button type="primary" style={{ width: '100%' }}>全选</Button></Col>
+                        </Row>
+                        <Row>
+                            <Table rowSelection={rowSelection} columns={columns} dataSource={data} />
+                        </Row>        
+                      </Card>
+                  </Col>
+                          <Col span={6}>
+                          <Card title="基本参数"  style={{ width: '100%' }}>
+                            <table>
+                               <tbody>
+                                <tr>
+                                  <td>要预测的时间单位数</td>
+                                  <td>
+                                    <InputNumber size="small" min={1} max={100} defaultValue={1}  onChange={this.onChangeInputNumber}  />
+                                  </td>
+                                </tr>
+                                <tr>
+                                  <td>周期性</td>
+                                  <td>
+                                    <Select defaultValue="Monthly" style={{ width: '100%' }} onChange={this.onhandlePeriodicity}>
+                                      <Option value="Hourly">Hourly</Option>
+                                      <Option value="Daily">Daily</Option>
+                                      <Option value="Weekly">Weekly</Option>
+                                      <Option value="Monthly">Monthly</Option>
+                                      <Option value="Quarterly">Quarterly</Option>
+                                      <Option value="Yearly">Yearly</Option>
+                                    </Select>
+                                  </td>
+                                </tr>
+                              </tbody>
+                            </table>
+                          </Card>
+                    </Col>
+                </Row>
+          </Row>
+          <Row>
+            <Row>
+                          
+                  <Col span={24}>
+                         <Card title="输出/可视化"  style={{ width: '100%'}}>
+                          <Button type="primary" style={{ width: '100%',marginBottom:'3px'}} onClick={this.startClassifierOk}>开始</Button>
+                         <Tabs activeKey={defaultKeyTab} type="card" onChange={this.tabChangeCallback.bind(this)}>
+                          <TabPane tab="输出" key="1"  >
+                            
+                              <Input style={{minHeight:'260px',minWidth:'100%' }}  type="textarea" value={content} />
+                          </TabPane>
+                          <TabPane tab="训练未来预测" key="2" >
+                          <div id="main" ref="lineEchart" style={{ width:'100%', height: '300px' }}></div>
+                          </TabPane>
+                        </Tabs>
+                        </Card>
+                  </Col>
+                </Row>
+          </Row>
+        </Container.Body>
+      </Container>
+    )
+  }
+  
+  startClassifierOk=(e)=>{
+    const { onstartClassifier,params,basicLearningInputValue,inputNumberVal,periodicityVal} = this.props;
+    const projectId = params.pid;
+    onstartClassifier(projectId,basicLearningInputValue,inputNumberVal,periodicityVal);
+  }
+  onChangeInputNumber=(e)=>{
+      const {onChangeInputNumber} = this.props;
+      onChangeInputNumber(e);
+  }
+  onhandlePeriodicity=(e)=>{
+      const {onhandlePeriodicity} = this.props;
+      onhandlePeriodicity(e);
+  }
+  handleOk = (e) => {
+     const {onChangeBasicLearningModal} = this.props;
+    onChangeBasicLearningModal(false);
+  }
+  handleCancel = (e) => {
+    const {onChangeBasicLearningModal} = this.props;
+    onChangeBasicLearningModal(false);
+  }
+  showModal = () => {
+    const {onChangeBasicLearningModal} = this.props;
+    onChangeBasicLearningModal(true);
+  }
+   tabChangeCallback1=(e)=>{
+        console.log(e);
+        setTimeout(() => {
+        console.log(this.refs.lineEchart+"---");
+        },0);//通过延时处理
+    }
+    public onSelect = (selectedKeys, info) => {
+      const {onChangeBasicLearningModal,onChangeBasicLearningInputValue} = this.props;
+      console.log( selectedKeys[0], info.node.props.title);
+      onChangeBasicLearningModal(false);
+      onChangeBasicLearningInputValue(info.node.props.title);
+    }
+  public tabChangeCallback(key) {
+    const {classifier,onChangeTabActiveKeyLoad,inputNumberVal} = this.props;
+    onChangeTabActiveKeyLoad(key);
+    if(classifier.projectId==undefined){
+      return;
+    }
+    var xlist = classifier.projectId.xList;
+    var ylist = classifier.projectId.ylist;
+      if(key == 2){
+        setTimeout(() => {
+          var myChart = echartsT.init(document.getElementById('main') as HTMLDivElement);
+          var option = {
+            title: {
+                 text: '预测属性：乘客数量',
+                },
+            grid:{
+                    x:35,
+                    y:45,
+                    x2:35,
+                    y2:20,
+                    borderWidth:1
+                },
+            tooltip: {},
+            xAxis: {
+                data: ylist //["2008-01-01", "2008-02-01", "2008-03-01", "2008-04-01", "2008-05-01"] //////ylist //["衬衫", "羊毛衫", "雪纺衫", "裤子", "高跟鞋", "袜子"]
+            },
+            yAxis: {},
+            series: [
+              {
+                name: '预测销量',
+                type: 'line',
+                data: []//xlist//
+              },
+              {
+                name: '销量',
+                type: 'line',
+                data: []//xlist//
+              }
+            ]
+          };
+          if (option && typeof option === "object") {
+            var nowarr = [];
+            var futurearr = [];
+            var xlist1  = JSON.parse(JSON.stringify(xlist));
+            var xlist2 = JSON.parse(JSON.stringify(xlist));
+            nowarr = xlist1.splice(0,xlist1.length-inputNumberVal);
+            console.log(inputNumberVal);
+            for(var i = 0 ; i < inputNumberVal ; i ++){
+                nowarr.push("-");
+            }
+            for(var i = 0 ; i < xlist2.length-inputNumberVal ; i ++){
+              futurearr.push("-");
+            }
+            var xlist1remain =xlist2.splice(xlist2.length-inputNumberVal);
+            for(var i = 0 ; i < xlist1remain.length ; i ++){
+                futurearr.push(xlist1remain[i]);
+            }
+            option.series[0].data =futurearr// [4, 8,64,56,'-'];
+            option.series[1].data =nowarr// ['-','-','-','-',256];
+            myChart.setOption(option, true);
+        }
+           myChart.setOption(option);
+        },5);
+       // 通过延时处理
+      }
+  }
+}
+
+const mapStateToProps = createStructuredSelector({
+  classifier : makeNewClassifier(),
+  defaultKey :makeClassifierTabsActiveKey(),
+  isVisible:makeClassifierIsVisible(),
+  basicLearningInputValue:makeClassifierBasicLearningValue(),
+  inputNumberVal:makeClassifierInputNumberVal(),
+  periodicityVal:makePeriodicityVal()
+})
+
+export function mapDispatchToProps (dispatch) {
+  return {
+    onLoadDisplays: (projectId) => dispatch(loadDisplays(projectId)),
+     //yzh
+    onLoadClassifier:(projectId)=>dispatch(loadClassifier(projectId)),
+    onstartClassifier:(projectId,basicLearningInputValue,inputNumberVal,periodicityVal)=>dispatch(startClassifier(projectId,basicLearningInputValue,inputNumberVal,periodicityVal)),
+    onChangeTabActiveKeyLoad:(key)=>dispatch(changeTabActiveKeyLoad(key)),
+    onChangeBasicLearningModal:(isVisible)=>dispatch(changeBasicLearningModal(isVisible)),
+    onChangeBasicLearningInputValue:(value)=>dispatch(changeBasicLearningInputValue(value)),
+    onChangeInputNumber:(value)=>dispatch(changeInputNumber(value)),
+    onhandlePeriodicity:(value)=>dispatch(handlePeriodicity(value)),
+  }
+}
+
+const withConnect = connect(mapStateToProps, mapDispatchToProps)
+const withDisplayReducer = injectReducer({ key: 'display', reducer: displayReducer })
+const withDisplaySaga = injectSaga({ key: 'display', saga: displaySaga })
+const withClassifierSaga= injectSaga({ key: 'classifier', saga: classifierSaga })//yzh
+const withClassifierReducer = injectReducer({key:'classifier',reducer:classifierReducer})
+const withPortalReducer = injectReducer({ key: 'portal', reducer: portalReducer })
+const withPortalSaga = injectSaga({ key: 'portal', saga: portalSaga })
+
+export default compose(
+  withClassifierSaga,
+  withClassifierReducer,
+  withDisplayReducer,
+  withDisplaySaga,
+  withPortalReducer,
+  withPortalSaga,
+  withConnect
+)(Equipment)
